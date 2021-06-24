@@ -1,1 +1,3 @@
-export default function validateSignUp({ name, email, password }) {}
+export default function validateSignUp({ name, email, password }) {
+  return;
+}
