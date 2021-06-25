@@ -9,7 +9,6 @@ export default function validateSignUp(name, email, password) {
 
   const validation = schema.validate({ name, email, password });
   const returnObject = {};
-  console.log(validation);
 
   if (!!validation.error) {
     returnObject["status"] = 400;

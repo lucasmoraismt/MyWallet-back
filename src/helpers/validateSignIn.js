@@ -10,7 +10,6 @@ export default async function validateSignUp(email, password) {
 
   const validation = schema.validate({ email, password });
   const returnObject = {};
-  console.log(validation);
 
   if (!!validation.error) {
     returnObject["status"] = 400;

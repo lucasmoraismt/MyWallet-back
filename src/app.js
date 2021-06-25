@@ -6,6 +6,7 @@ import connection from "./database.js";
 
 import validateSignUp from "./helpers/validateSignUp.js";
 import validateSignIn from "./helpers/validateSignIn.js";
+import validateExchanges from "./helpers/validateExchanges.js";
 
 const app = express();
 app.use(express.json());
@@ -81,9 +82,11 @@ app.post("/sign-in", async (req, res) => {
 });
 
 app.get("/finance", async (req, res) => {
-  const { token } = req.body;
+  const authorization = req.headers["authorization"];
+  const token = authorization?.replace("Bearer ", "");
+  console.log(req.headers);
   if (!token || token.length === 0) {
-    res.sendStatus(400);
+    return res.sendStatus(400);
   }
   try {
     const tokenQuery = await connection.query(
@@ -100,14 +103,62 @@ app.get("/finance", async (req, res) => {
       [tokenQuery.rows[0].userId]
     );
 
+    console.log(finance.rows);
     res.send(finance.rows);
   } catch {
     res.sendStatus(500);
   }
 });
 
+app.post("/income", async (req, res) => {
+  const authorization = req.headers["authorization"];
+  const token = authorization?.replace("Bearer ", "");
+  const { userId, type, text, value } = req.body;
+
+  const validation = validateExchanges(userId, type, text, value, token);
+
+  if (validation.status) {
+    return res.sendStatus(400);
+  }
+
+  try {
+    await connection.query(
+      `INSERT INTO finance ("userId", type, text, value) VALUES ($1, $2, $3, $4)`,
+      [userId, type, text, value]
+    );
+
+    res.sendStatus(200);
+  } catch {
+    res.sendStatus(500);
+  }
+});
+
+app.post("/expense", async (req, res) => {
+  const authorization = req.headers["authorization"];
+  const token = authorization?.replace("Bearer ", "");
+  const { userId, type, text, value } = req.body;
+
+  const validation = validateExchanges(userId, type, text, value, token);
+
+  if (validation.status) {
+    return res.sendStatus(400);
+  }
+
+  try {
+    await connection.query(
+      `INSERT INTO finance ("userId", type, text, value) VALUES ($1, $2, $3, $4)`,
+      [userId, type, text, value]
+    );
+
+    res.sendStatus(200);
+  } catch {
+    res.sendStatus(500);
+  }
+});
+
 app.delete("/sessions", async (req, res) => {
-  const { token } = req.body;
+  const authorization = req.headers["authorization"];
+  const token = authorization?.replace("Bearer ", "");
 
   if (!token || token.length === 0) {
     res.sendStatus(400);
