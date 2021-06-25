@@ -14,6 +14,10 @@ export default function validateSignUp(name, email, password) {
     returnObject["status"] = 400;
     return returnObject;
   }
+  if (name.trim().length === 0 || email.trim().length === 0) {
+    returnObject["status"] = 400;
+    return returnObject;
+  }
 
   return returnObject;
 }

@@ -1,6 +1,5 @@
 import joi from "joi";
 import connection from "../database.js";
-import pg from "pg";
 
 export default async function validateSignUp(email, password) {
   const schema = joi.object({
@@ -12,6 +11,10 @@ export default async function validateSignUp(email, password) {
   const returnObject = {};
 
   if (!!validation.error) {
+    returnObject["status"] = 400;
+    return returnObject;
+  }
+  if (email.trim().length === 0) {
     returnObject["status"] = 400;
     return returnObject;
   }

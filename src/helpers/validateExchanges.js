@@ -17,7 +17,6 @@ export default async function validateExchanges(
   });
 
   const validation = schema.validate({ userId, type, text, value, token });
-  console.log(validation);
   const returnObject = {};
 
   if (!!validation.error) {

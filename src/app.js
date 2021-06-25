@@ -22,19 +22,23 @@ app.post("/sign-up", async (req, res) => {
 
   const passwordHash = bcrypt.hashSync(password, 12);
 
-  const request = await connection.query(
-    `
+  try {
+    const request = await connection.query(
+      `
       INSERT INTO users (name, email, password) 
       SELECT $1, $2, $3
       WHERE NOT EXISTS (SELECT 1 FROM users WHERE email = $2)
     `,
-    [name, email, passwordHash]
-  );
+      [name, email, passwordHash]
+    );
 
-  if (request.rowCount > 0) {
-    res.sendStatus(201);
-  } else {
-    res.sendStatus(409);
+    if (request.rowCount > 0) {
+      res.sendStatus(201);
+    } else {
+      res.sendStatus(409);
+    }
+  } catch {
+    res.sendStatus(500);
   }
 });
 
@@ -84,8 +88,7 @@ app.post("/sign-in", async (req, res) => {
 app.get("/finance", async (req, res) => {
   const authorization = req.headers["authorization"];
   const token = authorization?.replace("Bearer ", "");
-  console.log(req.headers);
-  if (!token || token.length === 0) {
+  if (!token || token.trim().length === 0) {
     return res.sendStatus(400);
   }
   try {
@@ -103,7 +106,6 @@ app.get("/finance", async (req, res) => {
       [tokenQuery.rows[0].userId]
     );
 
-    console.log(finance.rows);
     res.send(finance.rows);
   } catch {
     res.sendStatus(500);
