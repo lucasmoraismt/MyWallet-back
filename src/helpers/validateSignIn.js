@@ -3,7 +3,7 @@ import connection from "../database.js";
 
 export default async function validateSignUp(email, password) {
   const schema = joi.object({
-    email: joi.string().min(3).required(),
+    email: joi.string().email().required(),
     password: joi.string().min(1).required(),
   });
 
@@ -13,8 +13,7 @@ export default async function validateSignUp(email, password) {
   if (!!validation.error) {
     returnObject["status"] = 400;
     return returnObject;
-  }
-  if (email.trim().length === 0) {
+  } else if (email.trim().length === 0) {
     returnObject["status"] = 400;
     return returnObject;
   }

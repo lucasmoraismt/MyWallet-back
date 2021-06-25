@@ -14,7 +14,7 @@ app.use(cors());
 
 app.post("/sign-up", async (req, res) => {
   const { name, email, password } = req.body;
-  const validation = validateSignUp(name, email, password);
+  const validation = await validateSignUp(name, email, password);
 
   if (validation.status) {
     return res.sendStatus(validation.status);
@@ -44,7 +44,7 @@ app.post("/sign-up", async (req, res) => {
 
 app.post("/sign-in", async (req, res) => {
   const { email, password } = req.body;
-  const validation = validateSignIn(email, password);
+  const validation = await validateSignIn(email, password);
 
   if (validation.status) {
     return res.sendStatus(validation.status);
@@ -117,7 +117,7 @@ app.post("/income", async (req, res) => {
   const token = authorization?.replace("Bearer ", "");
   const { userId, type, text, value } = req.body;
 
-  const validation = validateExchanges(userId, type, text, value, token);
+  const validation = await validateExchanges(userId, type, text, value, token);
 
   if (validation.status) {
     return res.sendStatus(400);
@@ -140,7 +140,7 @@ app.post("/expense", async (req, res) => {
   const token = authorization?.replace("Bearer ", "");
   const { userId, type, text, value } = req.body;
 
-  const validation = validateExchanges(userId, type, text, value, token);
+  const validation = await validateExchanges(userId, type, text, value, token);
 
   if (validation.status) {
     return res.sendStatus(400);

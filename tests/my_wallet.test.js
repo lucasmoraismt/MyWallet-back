@@ -3,15 +3,11 @@ import app from "../src/app.js";
 import connection from "../src/database.js";
 
 beforeEach(async () => {
-  await connection.query(
-    `DELETE FROM users WHERE name = 'teste' AND email = 'teste@teste.com'`
-  );
+  await connection.query(`DELETE FROM users WHERE email = 'teste@teste.com'`);
 });
 
 afterAll(async () => {
-  await connection.query(
-    `DELETE FROM users WHERE name = 'teste' AND email = 'teste@teste.com'`
-  );
+  await connection.query(`DELETE FROM users WHERE email = 'teste@teste.com'`);
   connection.end();
 });
 
@@ -60,7 +56,7 @@ describe("POST /signin", () => {
       password: "123456",
     };
 
-    await supertest(app).post("/sign-in").send(body2);
+    await supertest(app).post("/sign-up").send(body2);
     const result = await supertest(app).post("/sign-in").send(body1);
 
     expect.objectContaining({
@@ -82,7 +78,7 @@ describe("POST /signin", () => {
 
   it("returns status 400 for invalid params", async () => {
     const body1 = {
-      email: "    ",
+      email: "  ",
       password: "123456",
     };
     const body2 = {
@@ -100,7 +96,7 @@ describe("POST /signin", () => {
   it("returns status 401 for invalid password", async () => {
     const body1 = {
       email: "teste@teste.com",
-      password: "12345",
+      password: "1234",
     };
     const body2 = {
       name: "teste",
