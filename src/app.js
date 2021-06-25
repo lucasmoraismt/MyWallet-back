@@ -23,12 +23,10 @@ app.post("/sign-up", async (req, res) => {
 
   const request = await connection.query(
     `
-    INSERT INTO users (name, email, password) 
-    SELECT $1, $2, $3 
-    WHERE NOT EXISTS (
-      SELECT 1 FROM users WHERE email=$2
-    )
-  `,
+      INSERT INTO users (name, email, password) 
+      SELECT $1, $2, $3
+      WHERE NOT EXISTS (SELECT 1 FROM users WHERE email = $2)
+    `,
     [name, email, passwordHash]
   );
 
@@ -47,39 +45,39 @@ app.post("/sign-in", async (req, res) => {
     return res.sendStatus(validation.status);
   }
 
-  const result = await connection.query(
-    `
-      SELECT * FROM users
-      WHERE email = $1
-  `,
-    [email]
-  );
-
-  const user = result.rows[0];
-
-  if (user && bcrypt.compareSync(password, user.password)) {
-    const token = uuid.v4();
-
-    await connection.query(
+  try {
+    const result = await connection.query(
       `
-        INSERT INTO sessions ("userId", token)
-        VALUES ($1, $2)
-      `,
-      [user.id, token]
+        SELECT * FROM users
+        WHERE email = $1
+    `,
+      [email]
     );
 
-    res.send(token);
-  } else {
-    if (!user) {
-      res.sendStatus(404);
-    } else {
-      res.sendStatus(401);
-    }
-  }
-});
+    const user = result.rows[0];
 
-app.get("/sign-up", async (req, res) => {
-  res.sendStatus(201);
+    if (user && bcrypt.compareSync(password, user.password)) {
+      const token = uuid();
+
+      await connection.query(
+        `
+          INSERT INTO sessions ("userId", token)
+          VALUES ($1, $2)
+        `,
+        [user.id, token]
+      );
+
+      res.send({ user, token });
+    } else {
+      if (!user) {
+        res.sendStatus(404);
+      } else {
+        res.sendStatus(401);
+      }
+    }
+  } catch {
+    res.sendStatus(500);
+  }
 });
 
 export default app;
