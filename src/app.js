@@ -80,4 +80,48 @@ app.post("/sign-in", async (req, res) => {
   }
 });
 
+app.get("/finance", async (req, res) => {
+  const { token } = req.body;
+  if (!token || token.length === 0) {
+    res.sendStatus(400);
+  }
+  try {
+    const tokenQuery = await connection.query(
+      `SELECT * FROM sessions WHERE token = $1`,
+      [token]
+    );
+
+    if (tokenQuery.rows.length === 0) {
+      return res.sendStatus(401);
+    }
+
+    const finance = await connection.query(
+      `SELECT * FROM finance WHERE "userId" = $1`,
+      [tokenQuery.rows[0].userId]
+    );
+
+    res.send(finance.rows);
+  } catch {
+    res.sendStatus(500);
+  }
+});
+
+app.delete("/sessions", async (req, res) => {
+  const { token } = req.body;
+
+  if (!token || token.length === 0) {
+    res.sendStatus(400);
+  }
+  try {
+    const request = await connection.query(
+      `DELETE FROM sessions WHERE token = $1`,
+      [token]
+    );
+
+    res.sendStatus(200);
+  } catch {
+    res.sendStatus(500);
+  }
+});
+
 export default app;
